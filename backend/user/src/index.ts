@@ -33,8 +33,8 @@ const PORT = process.env.PORT || 5000;
 // app.get("/", (req, res) => {
 //   res.send("User Service is running");
 // });
-
-app.use('api/v1', userRoutes);
+app.use(express.json());
+app.use('/api/v1', userRoutes);
 
 app.listen(PORT, () => {
     console.log((`Server is running on PORT ${PORT} `));
