@@ -1,6 +1,8 @@
+import { generateToekn } from "../config/generateToken.js";
 import { publishToQueue } from "../config/rabbitmq.js";
 import TryCatch from "../config/TryCatch.js";
 import { redisClient } from "../index.js";
+import { User } from "../model/User.js";
 
 export const logInUser = TryCatch(async (req,res) => {
       const {email} = req.body;
@@ -37,3 +39,42 @@ export const logInUser = TryCatch(async (req,res) => {
         message:"OTP sent to your mail",
       })
 })
+
+
+// to verify User OTP 
+
+export const verifyUser = TryCatch(async (req, res) => {
+    const { email, otp:enteredOtp} = req.body; 
+
+    if(!email || !enteredOtp) {
+      res.status(400).json({ 
+        message:"Email and OTP are required",
+      })
+      return;
+    }
+      const otpKey = `otp:${email}`;
+
+      const storedOtp = await redisClient.get(otpKey);
+      if(!storedOtp || storedOtp !== enteredOtp) { 
+        res.status(400).json({
+            message:"Invalid or expred OTP",
+        })
+        return;
+      }
+
+      await redisClient.del(otpKey);
+
+      let user = await User.findOne({ email });
+
+      if(!user) {
+        const name = email.split("@")[0];
+        user = await User.create({ name, email });
+      }
+
+      const token = generateToekn(user)
+      res.status(200).json({
+        message:"User verified successfully",
+        user, 
+        token,
+      })
+} )
