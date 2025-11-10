@@ -3,10 +3,13 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import { createClient } from 'redis'
 import userRoutes from './routes/user.js';
+import { connectRabbitMQ } from './config/rabbitmq.js';
 
 dotenv.config();
 
  connectDB();
+
+ connectRabbitMQ();
 
 if (!process.env.REDIS_URL) {
   throw new Error('❌ Missing REDIS_URL environment variable');
@@ -30,8 +33,8 @@ const PORT = process.env.PORT || 5000;
 // app.get("/", (req, res) => {
 //   res.send("User Service is running");
 // });
-
-app.use('api/v1', userRoutes);
+app.use(express.json());
+app.use('/api/v1', userRoutes);
 
 app.listen(PORT, () => {
     console.log((`Server is running on PORT ${PORT} `));
