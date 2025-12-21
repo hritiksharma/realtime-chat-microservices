@@ -16,3 +16,5 @@ const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => {
     console.log((`Chat Service Server is running on PORT ${PORT} `));
 })
+
+export default app;
